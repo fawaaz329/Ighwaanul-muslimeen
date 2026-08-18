@@ -1,0 +1,2050 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Masjid Ighwaanul Muslimeen - Live Community Board</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Plus Jakarta Sans & Amiri -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            arabic: ['"Amiri"', 'serif'],
+          },
+          colors: {
+            emerald: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              850: '#064e3b',
+              900: '#022c22',
+            },
+            gold: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    
+    /* Desktop prayer tile styling */
+    @media (min-width: 1024px) {
+      .prayer-tile-card {
+        min-height: 185px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100/80 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-emerald-600 selection:text-white">
+
+  <!-- ================= NOTIFICATION TOAST ================= -->
+  <div id="toastNotification" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 px-5 py-3 rounded-2xl bg-emerald-800 text-white font-medium shadow-2xl border border-emerald-600/40">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-lg text-emerald-300"></i>
+    <span id="toastMessage" class="text-sm">Action completed successfully.</span>
+  </div>
+
+  <!-- ================= PUBLIC INTERFACE ================= -->
+  <div id="publicInterface" class="flex-1 flex flex-col">
+
+    <!-- 1. JANAZAH NOTICE BANNER (CONDITIONAL) -->
+    <div id="janazahBanner" class="hidden bg-gradient-to-r from-rose-900 via-rose-800 to-rose-900 border-b-2 border-rose-600 text-white shadow-lg relative overflow-hidden transition-all duration-500">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 relative z-10 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
+        <div class="flex items-center gap-3.5">
+          <span class="inline-flex items-center justify-center w-11 h-11 bg-white/15 border border-white/30 rounded-2xl text-white animate-pulse">
+            <i class="fa-solid fa-bell text-xl"></i>
+          </span>
+          <div>
+            <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
+              <span class="bg-white text-rose-900 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">Janazah Notice</span>
+              <span class="font-arabic text-rose-200 text-sm">إِنَّا لِلَّٰهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ</span>
+            </div>
+            <p class="text-sm sm:text-base font-bold text-white mt-0.5" id="janazahDetails"></p>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center justify-center gap-3 bg-black/25 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/20 text-xs">
+          <div><strong class="text-rose-200">Salah Time:</strong> <span id="janazahSalahTime" class="text-white font-medium">-</span></div>
+          <div class="h-3 w-px bg-rose-400/40 hidden sm:block"></div>
+          <div><strong class="text-rose-200">Graveyard:</strong> <span id="janazahGraveyard" class="text-white font-medium">-</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. HEADER & BRANDING BAR -->
+    <header class="bg-gradient-to-r from-emerald-900 via-emerald-850 to-teal-900 text-white shadow-md sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+          
+          <!-- Masjid Title & Tagline -->
+          <div class="flex items-center gap-4 text-center lg:text-left">
+            <div class="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 p-1 shadow-inner flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-mosque text-3xl text-emerald-300"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 justify-center lg:justify-start">
+                <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white font-sans">
+                  Masjid Ighwaanul Muslimeen
+                </h1>
+                <span class="hidden sm:inline-block bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Cape Town • Shafi'i</span>
+              </div>
+              <p class="text-xs sm:text-sm text-emerald-200/90 font-arabic tracking-wide">
+                مَسْجِد إِخْوَانِ الْمُسْلِمِينَ • Serving the Community with Faith, Unity & Compassion
+              </p>
+            </div>
+          </div>
+
+          <!-- Live Date & Clock Widget -->
+          <div class="flex items-center gap-4 bg-emerald-950/70 border border-emerald-700/50 px-4 py-2.5 rounded-2xl shadow-sm">
+            <div class="text-right border-r border-emerald-700/60 pr-4">
+              <div id="liveClock" class="text-xl sm:text-2xl font-black font-mono text-emerald-300 tracking-wider">00:00:00</div>
+              <div id="liveGregorianDate" class="text-[11px] text-slate-300 font-semibold tracking-tight">Syncing Date...</div>
+            </div>
+            <div class="pl-1 text-left">
+              <div class="flex items-center gap-1.5 text-amber-300 text-[11px] font-bold uppercase tracking-wider">
+                <i class="fa-solid fa-moon text-xs"></i>
+                <span>Islamic Calendar</span>
+              </div>
+              <div id="liveHijriDate" class="text-xs sm:text-sm font-bold text-white mt-0.5">
+                Calculating...
+              </div>
+              <div id="liveHijriDateAr" class="text-[11px] font-arabic text-amber-200"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </header>
+
+    <!-- 3. MAIN DASHBOARD CONTENT -->
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-7">
+
+      <!-- SECTION 1: PRAYER & IQAMAH TIMINGS (DESKTOP TILE CARDS) -->
+      <section class="space-y-4">
+        
+        <!-- Live Countdown Banner -->
+        <div class="bg-gradient-to-r from-emerald-800 to-teal-800 border border-emerald-700 text-white rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <div class="p-3 bg-white/10 rounded-2xl text-emerald-300 border border-white/15">
+              <i class="fa-solid fa-hourglass-half text-2xl"></i>
+            </div>
+            <div>
+              <div class="text-[11px] uppercase font-extrabold tracking-widest text-emerald-200 flex items-center gap-2">
+                <span>Next Upcoming Iqamah</span>
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-300 animate-ping"></span>
+                <span id="apiStatusBadge" class="bg-emerald-600/60 text-white text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/30">AlAdhan Cape Town</span>
+              </div>
+              <div class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                <span id="nextPrayerName" class="capitalize font-black text-amber-300">Calculating...</span>
+                <span class="text-xs text-emerald-100 font-mono" id="nextPrayerIqamahTime"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 bg-emerald-950/60 px-5 py-2.5 rounded-xl border border-emerald-600/40">
+            <span class="text-xs text-emerald-200 uppercase font-bold tracking-wider">Starts in:</span>
+            <span id="countdownTimer" class="font-mono text-2xl sm:text-3xl font-black text-white tracking-wider">--:--:--</span>
+          </div>
+        </div>
+
+        <!-- Prayer Times Tile Grid (Responsive square cards on desktop) -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          
+          <!-- Fajr -->
+          <div id="card-fajr" class="prayer-tile-card bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm hover:shadow-md transition duration-200">
+            <div class="flex justify-between items-center text-xs font-bold text-slate-500 mb-2">
+              <span class="uppercase tracking-wider font-extrabold text-slate-700">Fajr</span>
+              <span class="font-arabic text-sm text-emerald-700 font-bold">الفجر</span>
+            </div>
+            <div class="space-y-2.5 text-center my-auto">
+              <div>
+                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Adhan</span>
+                <span id="adhan-fajr" class="text-sm sm:text-base font-bold text-slate-700 font-mono">--:--</span>
+              </div>
+              <div class="bg-emerald-50 py-2 px-2.5 rounded-xl border border-emerald-200/80">
+                <span class="text-[10px] text-emerald-800 block font-black uppercase tracking-wider">Iqamah</span>
+                <span id="iqamah-fajr" class="text-lg sm:text-2xl font-black text-emerald-800 font-mono">--:--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dhuhr -->
+          <div id="card-dhuhr" class="prayer-tile-card bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm hover:shadow-md transition duration-200">
+            <div class="flex justify-between items-center text-xs font-bold text-slate-500 mb-2">
+              <span class="uppercase tracking-wider font-extrabold text-slate-700">Dhuhr</span>
+              <span class="font-arabic text-sm text-emerald-700 font-bold">الظهر</span>
+            </div>
+            <div class="space-y-2.5 text-center my-auto">
+              <div>
+                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Adhan</span>
+                <span id="adhan-dhuhr" class="text-sm sm:text-base font-bold text-slate-700 font-mono">--:--</span>
+              </div>
+              <div class="bg-emerald-50 py-2 px-2.5 rounded-xl border border-emerald-200/80">
+                <span class="text-[10px] text-emerald-800 block font-black uppercase tracking-wider">Iqamah</span>
+                <span id="iqamah-dhuhr" class="text-lg sm:text-2xl font-black text-emerald-800 font-mono">--:--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Asr -->
+          <div id="card-asr" class="prayer-tile-card bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm hover:shadow-md transition duration-200">
+            <div class="flex justify-between items-center text-xs font-bold text-slate-500 mb-2">
+              <span class="uppercase tracking-wider font-extrabold text-slate-700">Asr <span class="text-[9px] text-emerald-600 font-normal">(Shafi'i)</span></span>
+              <span class="font-arabic text-sm text-emerald-700 font-bold">العصر</span>
+            </div>
+            <div class="space-y-2.5 text-center my-auto">
+              <div>
+                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Adhan</span>
+                <span id="adhan-asr" class="text-sm sm:text-base font-bold text-slate-700 font-mono">--:--</span>
+              </div>
+              <div class="bg-emerald-50 py-2 px-2.5 rounded-xl border border-emerald-200/80">
+                <span class="text-[10px] text-emerald-800 block font-black uppercase tracking-wider">Iqamah</span>
+                <span id="iqamah-asr" class="text-lg sm:text-2xl font-black text-emerald-800 font-mono">--:--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Maghrib -->
+          <div id="card-maghrib" class="prayer-tile-card bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm hover:shadow-md transition duration-200">
+            <div class="flex justify-between items-center text-xs font-bold text-slate-500 mb-2">
+              <span class="uppercase tracking-wider font-extrabold text-slate-700">Maghrib</span>
+              <span class="font-arabic text-sm text-emerald-700 font-bold">المغرب</span>
+            </div>
+            <div class="space-y-2.5 text-center my-auto">
+              <div>
+                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Adhan</span>
+                <span id="adhan-maghrib" class="text-sm sm:text-base font-bold text-slate-700 font-mono">--:--</span>
+              </div>
+              <div class="bg-emerald-50 py-2 px-2.5 rounded-xl border border-emerald-200/80">
+                <span class="text-[10px] text-emerald-800 block font-black uppercase tracking-wider">Iqamah</span>
+                <span id="iqamah-maghrib" class="text-lg sm:text-2xl font-black text-emerald-800 font-mono">--:--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Isha -->
+          <div id="card-isha" class="prayer-tile-card bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm hover:shadow-md transition duration-200">
+            <div class="flex justify-between items-center text-xs font-bold text-slate-500 mb-2">
+              <span class="uppercase tracking-wider font-extrabold text-slate-700">Isha</span>
+              <span class="font-arabic text-sm text-emerald-700 font-bold">العشاء</span>
+            </div>
+            <div class="space-y-2.5 text-center my-auto">
+              <div>
+                <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Adhan</span>
+                <span id="adhan-isha" class="text-sm sm:text-base font-bold text-slate-700 font-mono">--:--</span>
+              </div>
+              <div class="bg-emerald-50 py-2 px-2.5 rounded-xl border border-emerald-200/80">
+                <span class="text-[10px] text-emerald-800 block font-black uppercase tracking-wider">Iqamah</span>
+                <span id="iqamah-isha" class="text-lg sm:text-2xl font-black text-emerald-800 font-mono">--:--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Jummah -->
+          <div id="card-jummah" class="prayer-tile-card bg-gradient-to-b from-amber-50 to-white border-2 border-amber-300 rounded-2xl p-4 shadow-sm hover:shadow-md transition duration-200">
+            <div class="flex justify-between items-center text-xs font-bold text-amber-800 mb-2">
+              <span class="uppercase tracking-wider font-extrabold text-amber-900">Jummah</span>
+              <span class="font-arabic text-sm text-amber-700 font-bold">الجمعة</span>
+            </div>
+            <div class="space-y-2.5 text-center my-auto">
+              <div>
+                <span class="text-[10px] text-amber-800 font-bold block uppercase tracking-wider">Bayan / Talk</span>
+                <span id="jummah-bayan" class="text-sm sm:text-base font-bold text-slate-700 font-mono">12:30</span>
+              </div>
+              <div class="bg-amber-100/80 py-2 px-2.5 rounded-xl border border-amber-300">
+                <span class="text-[10px] text-amber-900 block font-black uppercase tracking-wider">Khutbah & Salah</span>
+                <span id="jummah-khutbah" class="text-lg sm:text-2xl font-black text-amber-900 font-mono">13:00</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SECTION 2: WEEKLY CLASSES & COMMUNITY DU'A LIST -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Weekly Classes / Halaqaat Card -->
+        <div class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-700 shadow-sm">
+                <i class="fa-solid fa-graduation-cap text-lg"></i>
+              </div>
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-slate-900">Weekly Classes & Halaqaat</h2>
+                <p class="text-xs text-slate-500">Regular knowledge circles, Tafseer, and Tajweed sessions</p>
+              </div>
+            </div>
+            <span class="font-arabic text-sm text-indigo-700 font-bold hidden sm:inline">حِلَقُ الْعِلْمِ</span>
+          </div>
+
+          <div id="classesListContainer" class="space-y-3 max-h-64 overflow-y-auto pr-1.5 custom-scrollbar"></div>
+
+          <div class="mt-auto pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+            <span>Free and open to all community members.</span>
+            <span class="text-indigo-700 font-bold" id="classesCountTag">Active Sessions</span>
+          </div>
+        </div>
+
+        <!-- Du'a / Sick List Card -->
+        <div class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-700 shadow-sm">
+                <i class="fa-solid fa-hand-holding-heart text-lg"></i>
+              </div>
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-slate-900">Community Du'a & Healing List</h2>
+                <p class="text-xs text-slate-500">Praying for the complete Shifa of our ill brothers & sisters</p>
+              </div>
+            </div>
+            <span class="font-arabic text-sm text-teal-700 font-bold hidden sm:inline">أَسْأَلُ اللَّهَ الْعَظِيمَ أَنْ يَشْفِيَكَ</span>
+          </div>
+
+          <div id="sickListContainer" class="space-y-2.5 max-h-64 overflow-y-auto pr-1.5 custom-scrollbar"></div>
+
+          <div class="mt-auto pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+            <span>Please remember all the sick in your daily sujood.</span>
+            <span id="sickCountTag" class="text-teal-700 font-mono font-bold text-[11px]">0 listed</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SECTION 3: UPCOMING SPECIAL EVENTS & HAJJ/UMRAH DESK -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Upcoming Events Card -->
+        <div class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 shadow-sm">
+                <i class="fa-solid fa-calendar-check text-lg"></i>
+              </div>
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-slate-900">Upcoming Events & Lectures</h2>
+                <p class="text-xs text-slate-500">Special seminars, youth programs & guest scholar discourses</p>
+              </div>
+            </div>
+            <span class="font-arabic text-sm text-emerald-700 font-bold hidden sm:inline">الْفَعَالِيَاتُ الْقَادِمَة</span>
+          </div>
+
+          <div id="eventsListContainer" class="space-y-3 max-h-64 overflow-y-auto pr-1.5 custom-scrollbar"></div>
+
+          <div class="mt-auto pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+            <span>All events take place at the main masjid premises unless specified.</span>
+            <span class="text-emerald-700 font-bold text-[11px]">Events Desk</span>
+          </div>
+        </div>
+
+        <!-- Hajj & Umrah Notices Card -->
+        <div class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700 shadow-sm">
+                <i class="fa-solid fa-kaaba text-lg"></i>
+              </div>
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-slate-900">Hajj & Umrah Notices</h2>
+                <p class="text-xs text-slate-500">Orientation seminars, visa briefings & pilgrim schedules</p>
+              </div>
+            </div>
+            <span class="font-arabic text-sm text-amber-700 font-bold hidden sm:inline">لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</span>
+          </div>
+
+          <div id="hajjListContainer" class="space-y-3 max-h-64 overflow-y-auto pr-1.5 custom-scrollbar"></div>
+
+          <div class="mt-auto pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+            <span>May Allah grant all pilgrims an accepted pilgrimage (Hajj Mabrur).</span>
+            <span class="text-amber-700 font-bold text-[11px]">Pilgrim Desk</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SECTION 4: FUNDRAISERS & WHATSAPP CHANNELS -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Fundraisers & Mosque Projects -->
+        <div class="lg:col-span-2 bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 shadow-sm">
+                  <i class="fa-solid fa-hand-holding-dollar text-lg"></i>
+                </div>
+                <div>
+                  <h2 class="text-base sm:text-lg font-bold text-slate-900">Current Fundraisers & Masjid Projects</h2>
+                  <p class="text-xs text-slate-500">Continuous charity (Sadaqah Jariyah) for community infrastructure</p>
+                </div>
+              </div>
+            </div>
+
+            <div id="fundraisersContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+          </div>
+
+          <div class="mt-5 p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
+            <div class="flex items-center gap-2 text-slate-700">
+              <i class="fa-solid fa-building-columns text-emerald-700"></i>
+              <span id="bankDetailsDisplay">Bank Details: Standard Bank | Acc: 0123456789</span>
+            </div>
+            <span class="text-emerald-800 font-bold uppercase tracking-wider text-[10px] bg-emerald-100/70 px-2.5 py-1 rounded-md border border-emerald-300">Section 18A Tax Exempt</span>
+          </div>
+        </div>
+
+        <!-- WhatsApp Group Links Hub -->
+        <div class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center text-green-700 shadow-sm">
+                  <i class="fa-brands fa-whatsapp text-xl"></i>
+                </div>
+                <div>
+                  <h2 class="text-base sm:text-lg font-bold text-slate-900">WhatsApp Channels</h2>
+                  <p class="text-xs text-slate-500">Official broadcast groups</p>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+              Stay up-to-date with daily Adhan adjustments, special announcements, and weekly reminders:
+            </p>
+
+            <div id="whatsappLinksContainer" class="space-y-2.5"></div>
+          </div>
+
+          <p class="text-[11px] text-slate-400 mt-4 text-center">
+            <i class="fa-solid fa-shield-halved text-[9px] text-emerald-700"></i> Zero spam & strictly moderated by admin
+          </p>
+        </div>
+
+      </div>
+
+      <!-- SECTION 5: LEADERSHIP & COMMITTEE DIRECTORY -->
+      <section class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 mb-5 gap-2">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-700 shadow-sm">
+              <i class="fa-solid fa-users text-lg"></i>
+            </div>
+            <div>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">Leadership & Committee Directory</h2>
+              <p class="text-xs text-slate-500">Direct contact details for the Imam, Trustees, and Management</p>
+            </div>
+          </div>
+          <div class="text-xs text-slate-500 bg-slate-50 px-3 py-1 rounded-lg border border-slate-200">
+            Office Hours: <strong class="text-slate-800 font-bold">Daily between Asr & Maghrib</strong>
+          </div>
+        </div>
+
+        <div id="leadershipContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+      </section>
+
+    </main>
+
+    <!-- 4. FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-xs text-slate-500 mt-auto">
+      <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div>
+          © <span id="currentYear"></span> <strong>Masjid Ighwaanul Muslimeen</strong>. All rights reserved.
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="flex items-center gap-1.5 text-emerald-700 font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
+            <span id="syncFooterStatus">Cape Town Shafi'i Auto-Sync</span>
+          </span>
+          <button onclick="openAdminModal()" class="hover:bg-slate-100 transition-colors flex items-center gap-1.5 font-bold bg-slate-50 border border-slate-300 text-slate-700 px-3.5 py-1.5 rounded-xl shadow-sm">
+            <i class="fa-solid fa-lock text-[10px] text-emerald-700"></i>
+            <span>Admin Portal</span>
+          </button>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ================= SECURE ADMIN MODAL & MASTER CONTROL PANEL ================= -->
+  <div id="adminModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    
+    <!-- AUTH GATE FORM (STEP 1) -->
+    <div id="adminAuthBox" class="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl relative text-center">
+      <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-2 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 mx-auto mb-4 shadow-sm">
+        <i class="fa-solid fa-shield-halved text-2xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-slate-900 mb-1">Masjid Administrator Portal</h3>
+      <p class="text-xs text-slate-500 mb-6">Enter credentials to modify schedules, classes, notices, and settings</p>
+
+      <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-4 text-left">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Admin Username</label>
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+            <input type="text" id="loginUsername" required class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white" placeholder="admin">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Password</label>
+          <div class="relative">
+            <i class="fa-solid fa-key absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+            <input type="password" id="loginPassword" required class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white" placeholder="••••••••">
+          </div>
+        </div>
+
+        <div id="loginError" class="hidden text-xs text-rose-700 bg-rose-50 border border-rose-200 p-2.5 rounded-lg text-center font-medium">
+          Invalid username or password. Default is <span class="font-mono font-bold underline">admin / admin</span>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl transition shadow-md mt-2">
+          Authenticate & Open Console
+        </button>
+      </form>
+    </div>
+
+    <!-- MASTER CONTROL DASHBOARD (STEP 2) -->
+    <div id="adminControlPanel" class="hidden w-full max-w-5xl bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden my-6">
+      
+      <!-- Admin Top Nav -->
+      <div class="bg-slate-900 text-white px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+          <h3 class="text-base font-bold text-white">Notice Board Control Console</h3>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded border border-emerald-400/30 font-bold">Authorized Session</span>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <button onclick="handleAdminLogout()" class="px-3 py-1.5 text-xs text-rose-300 hover:text-white bg-rose-950/60 border border-rose-800 rounded-xl transition">
+            <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Log Out
+          </button>
+          <button onclick="closeAdminModal()" class="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Form Wrapper -->
+      <div class="p-6 max-h-[78vh] overflow-y-auto custom-scrollbar space-y-8 bg-slate-50">
+        
+        <!-- SECTION 1: ALADHAN CAPE TOWN AUTO-SYNC & IQAMA DELAYS -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 mb-4 gap-2">
+            <div class="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+              <i class="fa-solid fa-cloud-arrow-down text-base"></i>
+              <span>Cape Town (Shafi'i) AlAdhan Integration</span>
+            </div>
+            
+            <div class="flex items-center gap-3">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="inputAutoApi" class="sr-only peer" onchange="toggleApiMode(this.checked)">
+                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-700"></div>
+                <span class="ml-2.5 text-xs font-bold text-slate-800">Auto Live Sync (Cape Town)</span>
+              </label>
+              
+              <button onclick="fetchAlAdhanTimings(true)" class="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                <span>Fetch Now</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Automatic Iqamah Delay (Minutes after Adhan)</label>
+              <input type="number" id="inputIqamaOffset" value="10" min="1" max="60" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 font-bold focus:outline-none focus:border-emerald-600" placeholder="10">
+              <p class="text-[10px] text-slate-400 mt-1">Automatically recalculates Iqamah times as Adhan shifts across the seasons.</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Moon-Sighting Hijri Day Offset</label>
+              <select id="inputHijriOffset" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-600">
+                <option value="-2">-2 Days</option>
+                <option value="-1">-1 Day</option>
+                <option value="0" selected>0 Days (Standard Astronomical)</option>
+                <option value="1">+1 Day (Local Cape Town Sighting)</option>
+                <option value="2">+2 Days</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: JANAZAH ALERT SETTINGS -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+            <div class="flex items-center gap-2 text-rose-700 font-bold text-sm">
+              <i class="fa-solid fa-bell"></i>
+              <span>Janazah Banner Control</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="inputJanazahActive" class="sr-only peer">
+              <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+              <span class="ml-2.5 text-xs font-bold text-slate-800">Banner Active</span>
+            </label>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="sm:col-span-3">
+              <label class="block text-xs font-bold text-slate-700 mb-1">Marhum / Marhumah Full Name</label>
+              <input type="text" id="inputJanazahMarhum" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Janazah Salah Timing</label>
+              <input type="text" id="inputJanazahSalahTime" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white" placeholder="e.g. After Dhuhr (13:15)">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Graveyard / Qabarstan</label>
+              <input type="text" id="inputJanazahGraveyard" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white" placeholder="e.g. Mowbray Muslim Cemetery">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Du'a / Special Instructions</label>
+              <input type="text" id="inputJanazahExtra" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white" placeholder="e.g. Please make du'a for Maghfirah">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: PRAYER & IQAMAH SCHEDULE (MANUAL OVERRIDE INPUTS) -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+            <div class="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+              <i class="fa-solid fa-clock"></i>
+              <span>Prayer Times Table (24-Hour Format: HH:mm)</span>
+            </div>
+            <span id="manualNotice" class="text-xs text-amber-700 font-semibold">Auto-Sync is Active</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <!-- Fajr -->
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+              <span class="text-xs font-bold text-emerald-800">FAJR</span>
+              <div>
+                <label class="text-[10px] font-semibold text-slate-500">Adhan</label>
+                <input type="text" id="edit-adhan-fajr" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono text-center text-slate-800 font-bold">
+              </div>
+              <div>
+                <label class="text-[10px] font-semibold text-slate-500">Iqamah</label>
+                <input type="text" id="edit-iqamah-fajr" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono text-center text-emerald-700 font-black">
+              </div>
+            </div>
+
+            <!-- Dhuhr -->
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+              <span class="text-xs font-bold text-emerald-800">DHUHR</span>
+              <div>
+                <label class="text-[10px] font-semibold text-slate-500">Adhan</label>
+                <input type="text" id="edit-adhan-dhuhr" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono text-center text-slate-800 font-bold">
+              </div>
+              <div>
+                <label class="text-[10px] font-semibold text-slate-500">Iqamah</label>
+                <input type="text" id="edit-iqamah-dhuhr" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono text-center text-emerald-700 font-black">
+              </div>
+            </div>
+
+            <!-- Asr -->
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+              <span class="text-xs font-bold text-emerald-800">ASR (Shafi'i)</span>
+              <div>
+                <label class="text-[10px] font-semibold text-slate-500">Adhan</label>
+                <input type="text" id="edit-adhan-asr" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono text-center text-slate-800 font-bold">
+              </div>
+              <div>
+                <label class="text-[10px] font-semibold text-slate-500">Iqamah</label>
+                <input type="text" id="edit-iqamah-asr" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono text-center text-emerald-700 font-black">
+              </div>
+            </div>
+
+            <!-- Maghrib -->
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+              <span class="text-xs font-bold text-emerald-800">MAGHRIB</span>
+              <div>
+                <label class="text-[10px] font-semibold text-slate-500">Adhan</label>
+                <input type="text" id="edit-adhan-maghrib" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono text-center text-slate-800 font-bold">
+              </div>
+              <div>
+                <label class="text-[10px] font-semibold text-slate-500">Iqamah</label>
+                <input type="text" id="edit-iqamah-maghrib" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono text-center text-emerald-700 font-black">
+              </div>
+            </div>
+
+            <!-- Isha -->
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+              <span class="text-xs font-bold text-emerald-800">ISHA</span>
+              <div>
+                <label class="text-[10px] font-semibold text-slate-500">Adhan</label>
+                <input type="text" id="edit-adhan-isha" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono text-center text-slate-800 font-bold">
+              </div>
+              <div>
+                <label class="text-[10px] font-semibold text-slate-500">Iqamah</label>
+                <input type="text" id="edit-iqamah-isha" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono text-center text-emerald-700 font-black">
+              </div>
+            </div>
+
+            <!-- Jummah -->
+            <div class="bg-amber-50/70 p-3 rounded-xl border border-amber-200 space-y-2">
+              <span class="text-xs font-bold text-amber-900">JUMMAH</span>
+              <div>
+                <label class="text-[10px] font-semibold text-slate-500">Bayan</label>
+                <input type="text" id="edit-jummah-bayan" class="w-full px-2 py-1 bg-white border border-amber-300 rounded text-xs font-mono text-center text-slate-800 font-bold">
+              </div>
+              <div>
+                <label class="text-[10px] font-semibold text-slate-500">Khutbah/Salah</label>
+                <input type="text" id="edit-jummah-khutbah" class="w-full px-2 py-1 bg-white border border-amber-300 rounded text-xs font-mono text-center text-amber-900 font-black">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: WEEKLY CLASSES & UPCOMING EVENTS -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Weekly Classes Editor -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div class="flex items-center gap-2 text-indigo-700 font-bold text-sm">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>Weekly Classes & Halaqaat</span>
+              </div>
+              <button onclick="addClassRow()" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold">
+                + Add Class
+              </button>
+            </div>
+            <div id="adminClassRows" class="space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-1"></div>
+          </div>
+
+          <!-- Upcoming Events Editor -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div class="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+                <i class="fa-solid fa-calendar-check"></i>
+                <span>Upcoming Special Events</span>
+              </div>
+              <button onclick="addEventRow()" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-bold">
+                + Add Event
+              </button>
+            </div>
+            <div id="adminEventRows" class="space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-1"></div>
+          </div>
+
+        </div>
+
+        <!-- SECTION 5: SICK LIST & HAJJ/UMRAH -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Sick List Form Editor -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div class="flex items-center gap-2 text-teal-700 font-bold text-sm">
+                <i class="fa-solid fa-bed-pulse"></i>
+                <span>Du'a / Sick List</span>
+              </div>
+              <button onclick="addSickRow()" class="px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 rounded-lg text-xs font-bold">
+                + Add Name
+              </button>
+            </div>
+            <div id="adminSickRows" class="space-y-3 max-h-56 overflow-y-auto custom-scrollbar pr-1"></div>
+          </div>
+
+          <!-- Hajj & Umrah Notices Editor -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div class="flex items-center gap-2 text-amber-700 font-bold text-sm">
+                <i class="fa-solid fa-kaaba"></i>
+                <span>Hajj & Umrah Notices</span>
+              </div>
+              <button onclick="addHajjRow()" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs font-bold">
+                + Add Notice
+              </button>
+            </div>
+            <div id="adminHajjRows" class="space-y-3 max-h-56 overflow-y-auto custom-scrollbar pr-1"></div>
+          </div>
+
+        </div>
+
+        <!-- SECTION 6: FUNDRAISERS & WHATSAPP CHANNELS -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Fundraisers Editor -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div class="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+                <span>Fundraiser Projects</span>
+              </div>
+              <button onclick="addFundraiserRow()" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-bold">
+                + Add Project
+              </button>
+            </div>
+            <div id="adminFundraiserRows" class="space-y-3 max-h-56 overflow-y-auto custom-scrollbar pr-1"></div>
+            <div class="pt-2 border-t border-slate-100">
+              <label class="block text-xs font-bold text-slate-700 mb-1">Masjid Bank Account Info (Footer Note)</label>
+              <input type="text" id="inputBankDetails" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900">
+            </div>
+          </div>
+
+          <!-- WhatsApp Groups Editor -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div class="flex items-center gap-2 text-green-700 font-bold text-sm">
+                <i class="fa-brands fa-whatsapp"></i>
+                <span>WhatsApp Channels</span>
+              </div>
+              <button onclick="addWhatsappRow()" class="px-2.5 py-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded-lg text-xs font-bold">
+                + Add Channel
+              </button>
+            </div>
+            <div id="adminWhatsappRows" class="space-y-3 max-h-56 overflow-y-auto custom-scrollbar pr-1"></div>
+          </div>
+
+        </div>
+
+        <!-- SECTION 7: LEADERSHIP & COMMITTEE DIRECTORY -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2 text-sky-700 font-bold text-sm">
+              <i class="fa-solid fa-users-gear"></i>
+              <span>Leadership & Executive Committee</span>
+            </div>
+            <button onclick="addLeadershipRow()" class="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-lg text-xs font-bold">
+              + Add Member
+            </button>
+          </div>
+          <div id="adminLeadershipRows" class="space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-1"></div>
+        </div>
+
+        <!-- SECTION 8: ADMIN CREDENTIALS & SECURITY -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center gap-2 text-purple-700 font-bold text-sm border-b border-slate-100 pb-2">
+            <i class="fa-solid fa-key"></i>
+            <span>Update Admin Login Credentials</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Admin Username</label>
+              <input type="text" id="changeUsernameInput" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900" placeholder="Username">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">New Password</label>
+              <input type="password" id="changePasswordInput" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900" placeholder="Leave empty to keep current password">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Footer -->
+      <div class="bg-slate-100 px-6 py-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <button onclick="resetToFactoryDefaults()" class="text-xs text-rose-700 hover:underline font-bold">
+          <i class="fa-solid fa-rotate-left mr-1"></i> Reset to Masjid Defaults
+        </button>
+
+        <div class="flex items-center gap-3">
+          <button onclick="closeAdminModal()" class="px-4 py-2 bg-white hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs border border-slate-300 transition">
+            Cancel
+          </button>
+          <button onclick="saveAllAdminChanges()" class="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs shadow-md flex items-center gap-2">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save & Publish Live</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ================= JAVASCRIPT ENGINE & ALADHAN INTEGRATION ================= -->
+  <script>
+    // ACCURATE ISLAMIC MONTH CONSTANTS
+    const ISLAMIC_MONTHS_EN = [
+      "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
+      "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
+      "Ramadan", "Shawwal", "Dhul Qa'dah", "Dhul Hijjah"
+    ];
+    const ISLAMIC_MONTHS_AR = [
+      "محرّم", "صفر", "ربيع الأول", "ربيع الثاني",
+      "جمادى الأولى", "جمادى الآخرة", "رجب", "شعبان",
+      "رمضان", "شوّال", "ذو القعدة", "ذو الحجة"
+    ];
+
+    // DEFAULT MOSQUE STATE
+    const DEFAULT_MASJID_DATA = {
+      autoApi: true,
+      iqamaOffset: 10,
+      hijriOffset: 0,
+      janazah: {
+        active: true,
+        marhum: "Marhum Haji Ismail Hendricks (Rahmatullah Alayh)",
+        salahTime: "After Dhuhr Salah (13:15)",
+        graveyard: "Mowbray Muslim Cemetery (Qabarstan)",
+        extraNotes: "May Allah grant him Jannatul Firdaus and grant Sabr to the bereaved family."
+      },
+      prayers: {
+        fajr: { adhan: "05:42", iqamah: "05:52" },
+        dhuhr: { adhan: "12:47", iqamah: "12:57" },
+        asr: { adhan: "15:52", iqamah: "16:02" },
+        maghrib: { adhan: "18:16", iqamah: "18:26" },
+        isha: { adhan: "19:35", iqamah: "19:45" },
+        jummah: { bayan: "12:30", khutbah: "13:00" }
+      },
+      classes: [
+        {
+          title: "Tafseer-ul-Qur'an & Reflection",
+          teacher: "Moulana Dr. Bilal Hendricks",
+          dayTime: "Every Tuesday after Maghrib",
+          location: "Main Prayer Hall",
+          audience: "Brothers & Sisters",
+          desc: "Verses analysis with practical everyday application."
+        },
+        {
+          title: "Tajweed & Makharij Foundations",
+          teacher: "Qari Muhammad Saleem",
+          dayTime: "Every Thursday 19:30 - 20:30",
+          location: "Classroom B",
+          audience: "Adult Beginners",
+          desc: "Step-by-step recitation correction and vocal rules."
+        },
+        {
+          title: "Fiqh of Purification & Salah",
+          teacher: "Sheikh Zubair Mohamed",
+          dayTime: "Every Sunday after Fajr",
+          location: "Community Hall",
+          audience: "All Welcome",
+          desc: "Interactive Q&A followed by light morning refreshments."
+        }
+      ],
+      events: [
+        {
+          title: "Annual Youth Leadership & Character Workshop",
+          date: "Saturday, 29 August 2026",
+          time: "10:00 AM - 01:00 PM",
+          speaker: "Guest Speaker: Sheikh Ismail Londt",
+          desc: "Empowering our youth with Islamic resilience, career ethics, and community service mindset. Lunch served."
+        },
+        {
+          title: "Community Health & Wellness Screening Day",
+          date: "Sunday, 06 September 2026",
+          time: "09:00 AM - 12:30 PM",
+          speaker: "Organized by Islamic Medical Association (IMA)",
+          desc: "Free blood pressure, glucose, and eye testing in the community courtyard for all seniors and families."
+        }
+      ],
+      sickList: [
+        { name: "Brother Farooq Patel", condition: "Recovering from bypass surgery (MediClinic Ward 3)" },
+        { name: "Sister Amina Davids", condition: "Ill at home — requesting du'as for ease & shifa" },
+        { name: "Uncle Yusuf Adams", condition: "Admitted in hospital — prayers requested" }
+      ],
+      hajjList: [
+        { 
+          title: "Hajj Readiness & Logistics Seminar", 
+          date: "Sunday, 24 August 2026", 
+          time: "10:00 AM", 
+          location: "Main Prayer Hall", 
+          desc: "Practical guidance on Manasik, Ihram, health requirements, and baggage allowances." 
+        },
+        { 
+          title: "Umrah Group Departure Briefing", 
+          date: "Tuesday, 15 September 2026", 
+          time: "Post-Isha (20:45)", 
+          location: "Community Center", 
+          desc: "Flight check-in protocol, visa verification, and tour guide introduction." 
+        }
+      ],
+      fundraisers: [
+        { 
+          title: "Solar Inverter & Battery System", 
+          target: "R 180,000", 
+          raised: "R 125,000", 
+          percentage: 69, 
+          desc: "Guarantees power for lights, sound system, and wudu water pressure during load shedding." 
+        },
+        { 
+          title: "Madrasah Interactive Digital Classrooms", 
+          target: "R 95,000", 
+          raised: "R 68,500", 
+          percentage: 72, 
+          desc: "Modern digital screens, Quranic audio modules, and improved study desks for students." 
+        }
+      ],
+      bankDetails: "Bank: Standard Bank | Acc Name: Masjid Ighwaanul Muslimeen | Acc: 0123456789 | Branch: 250655",
+      whatsappLinks: [
+        { title: "Official Community Broadcast", url: "https://chat.whatsapp.com/example1", desc: "Daily Adhan updates & announcements" },
+        { title: "Daily Hadith & Tafseer Circle", url: "https://chat.whatsapp.com/example2", desc: "Short morning spiritual reflections" },
+        { title: "Youth Development & Sports", url: "https://chat.whatsapp.com/example3", desc: "Weekly activities & youth soccer league" }
+      ],
+      leadership: [
+        { role: "Resident Imam & Khateeb", name: "Moulana Dr. Bilal Hendricks", phone: "+27 82 111 2233", email: "imam@masjidighwaan.org" },
+        { role: "Chairman of Trustees", name: "Haji Sulaiman Jacobs", phone: "+27 83 444 5566", email: "chair@masjidighwaan.org" },
+        { role: "Treasurer & Finance", name: "Brother Ebrahim Cassiem (CA)", phone: "+27 84 777 8899", email: "treasury@masjidighwaan.org" },
+        { role: "Secretary & Madrasah Head", name: "Moulana Zubair Mohamed", phone: "+27 81 999 0011", email: "secretariat@masjidighwaan.org" }
+      ]
+    };
+
+    const STORAGE_DATA_KEY = "masjid_board_data_v4";
+    const STORAGE_AUTH_KEY = "masjid_auth_creds_v4";
+
+    function getAppData() {
+      const stored = localStorage.getItem(STORAGE_DATA_KEY);
+      if (!stored) {
+        localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(DEFAULT_MASJID_DATA));
+        return DEFAULT_MASJID_DATA;
+      }
+      try {
+        const parsed = JSON.parse(stored);
+        return { ...DEFAULT_MASJID_DATA, ...parsed };
+      } catch (e) {
+        return DEFAULT_MASJID_DATA;
+      }
+    }
+
+    function saveAppData(data) {
+      localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(data));
+      renderPublicUI();
+    }
+
+    function getAuthCreds() {
+      const stored = localStorage.getItem(STORAGE_AUTH_KEY);
+      if (!stored) {
+        const defaultCreds = { username: "admin", password: "admin" };
+        localStorage.setItem(STORAGE_AUTH_KEY, JSON.stringify(defaultCreds));
+        return defaultCreds;
+      }
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        return { username: "admin", password: "admin" };
+      }
+    }
+
+    // TIME ARITHMETIC UTILITIES
+    function addMinutesToTime(timeStr, minutesToAdd = 10) {
+      if (!timeStr) return "--:--";
+      const cleanTime = timeStr.split(' ')[0];
+      const [hours, minutes] = cleanTime.split(':').map(Number);
+      if (isNaN(hours) || isNaN(minutes)) return cleanTime;
+      
+      const totalMinutes = hours * 60 + minutes + Number(minutesToAdd);
+      const normalizedMinutes = ((totalMinutes % 1440) + 1440) % 1440;
+      const formattedHours = String(Math.floor(normalizedMinutes / 60)).padStart(2, '0');
+      const formattedMinutes = String(normalizedMinutes % 60).padStart(2, '0');
+      
+      return `${formattedHours}:${formattedMinutes}`;
+    }
+
+    function processPrayerTimesWithIqama(apiResponseData, offset = 10) {
+      const timings = apiResponseData.data.timings;
+      const mainPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+      const schedule = {};
+
+      mainPrayers.forEach((prayer) => {
+        if (timings[prayer]) {
+          const adhanTime = timings[prayer].split(' ')[0];
+          schedule[prayer.toLowerCase()] = {
+            adhan: adhanTime,
+            iqamah: addMinutesToTime(adhanTime, offset)
+          };
+        }
+      });
+
+      return schedule;
+    }
+
+    // ALADHAN API FETCHER (CAPE TOWN, SHAFI'I)
+    async function fetchAlAdhanTimings(forceToast = false) {
+      const appData = getAppData();
+      if (!appData.autoApi) return;
+
+      try {
+        // Cape Town: school=0 (Shafi'i), method=3 (Muslim World League)
+        const url = "https://api.aladhan.com/v1/timingsByCity?city=Cape%20Town&country=South%20Africa&method=3&school=0";
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("API response error");
+        
+        const data = await res.json();
+        if (data && data.data && data.data.timings) {
+          const parsedSchedule = processPrayerTimesWithIqama(data, appData.iqamaOffset || 10);
+          
+          appData.prayers.fajr = parsedSchedule.fajr;
+          appData.prayers.dhuhr = parsedSchedule.dhuhr;
+          appData.prayers.asr = parsedSchedule.asr;
+          appData.prayers.maghrib = parsedSchedule.maghrib;
+          appData.prayers.isha = parsedSchedule.isha;
+
+          // Hijri Date from API if available
+          if (data.data.date && data.data.date.hijri) {
+            const h = data.data.date.hijri;
+            appData.apiHijri = {
+              day: h.day,
+              monthEn: h.month.en,
+              monthAr: h.month.ar,
+              year: h.year
+            };
+          }
+
+          saveAppData(appData);
+          if (forceToast) showToast("Cape Town Shafi'i prayer times updated live!");
+        }
+      } catch (err) {
+        console.warn("Could not fetch AlAdhan live times; using local cached times.", err);
+        if (forceToast) showToast("Offline: Using saved local prayer times.", true);
+      }
+    }
+
+    // ACCURATE HIJRI DATE CALCULATOR
+    function calculateHijriDate(date, offsetDays = 0) {
+      const appData = getAppData();
+      if (appData.apiHijri && offsetDays === 0) {
+        return {
+          en: `${appData.apiHijri.day} ${appData.apiHijri.monthEn} ${appData.apiHijri.year} AH`,
+          ar: `${appData.apiHijri.day} ${appData.apiHijri.monthAr} ${appData.apiHijri.year} هـ`
+        };
+      }
+
+      const adjustedDate = new Date(date.getTime() + offsetDays * 86400000);
+      try {
+        const formatter = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', {
+          day: 'numeric',
+          month: 'numeric',
+          year: 'numeric'
+        });
+        const parts = formatter.formatToParts(adjustedDate);
+        const day = parts.find(p => p.type === 'day')?.value;
+        const monthNum = parseInt(parts.find(p => p.type === 'month')?.value, 10);
+        let year = parts.find(p => p.type === 'year')?.value?.replace(/[^0-9]/g, '');
+
+        if (day && monthNum && monthNum >= 1 && monthNum <= 12 && year) {
+          return {
+            en: `${day} ${ISLAMIC_MONTHS_EN[monthNum - 1]} ${year} AH`,
+            ar: `${day} ${ISLAMIC_MONTHS_AR[monthNum - 1]} ${year} هـ`
+          };
+        }
+      } catch (e) {}
+
+      return { en: "Safar 1448 AH", ar: "صفر 1448 هـ" };
+    }
+
+    // LIVE CLOCK & TICKER
+    function updateClockAndDates() {
+      const now = new Date();
+
+      // Digital Clock
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById("liveClock").textContent = `${hours}:${minutes}:${seconds}`;
+
+      // Gregorian Date
+      const gOptions = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+      document.getElementById("liveGregorianDate").textContent = now.toLocaleDateString('en-GB', gOptions);
+
+      // Footer year
+      document.getElementById("currentYear").textContent = now.getFullYear();
+
+      // Hijri Date
+      const data = getAppData();
+      const offset = parseInt(data.hijriOffset || 0, 10);
+      const hijri = calculateHijriDate(now, offset);
+
+      document.getElementById("liveHijriDate").textContent = hijri.en;
+      document.getElementById("liveHijriDateAr").textContent = hijri.ar;
+
+      // Countdown
+      updateIqamahCountdown(now);
+    }
+
+    // IQAMAH COUNTDOWN & PRAYER HIGHLIGHTER
+    function updateIqamahCountdown(now) {
+      const data = getAppData();
+      const p = data.prayers;
+
+      const prayerTimesToday = [
+        { name: "Fajr", time: p.fajr.iqamah, cardId: "card-fajr" },
+        { name: "Dhuhr", time: p.dhuhr.iqamah, cardId: "card-dhuhr" },
+        { name: "Asr", time: p.asr.iqamah, cardId: "card-asr" },
+        { name: "Maghrib", time: p.maghrib.iqamah, cardId: "card-maghrib" },
+        { name: "Isha", time: p.isha.iqamah, cardId: "card-isha" }
+      ];
+
+      prayerTimesToday.forEach(item => {
+        const card = document.getElementById(item.cardId);
+        if (card) card.classList.remove("ring-2", "ring-emerald-600", "bg-emerald-50/50");
+      });
+
+      let nextPrayer = null;
+      let targetTime = null;
+
+      for (let item of prayerTimesToday) {
+        if (!item.time || item.time === "--:--") continue;
+        const [h, m] = item.time.split(":").map(Number);
+        const pDate = new Date(now);
+        pDate.setHours(h, m, 0, 0);
+
+        if (pDate > now) {
+          nextPrayer = item;
+          targetTime = pDate;
+          break;
+        }
+      }
+
+      if (!nextPrayer && prayerTimesToday[0].time !== "--:--") {
+        nextPrayer = prayerTimesToday[0];
+        const [h, m] = nextPrayer.time.split(":").map(Number);
+        targetTime = new Date(now);
+        targetTime.setDate(targetTime.getDate() + 1);
+        targetTime.setHours(h, m, 0, 0);
+      }
+
+      if (nextPrayer && targetTime) {
+        const activeCard = document.getElementById(nextPrayer.cardId);
+        if (activeCard) activeCard.classList.add("ring-2", "ring-emerald-600", "bg-emerald-50/50");
+
+        document.getElementById("nextPrayerName").textContent = `${nextPrayer.name} Iqamah`;
+        document.getElementById("nextPrayerIqamahTime").textContent = `(${nextPrayer.time})`;
+
+        const diffMs = targetTime - now;
+        const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const diffSecs = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+        document.getElementById("countdownTimer").textContent = 
+          `${String(diffHrs).padStart(2, '0')}:${String(diffMins).padStart(2, '0')}:${String(diffSecs).padStart(2, '0')}`;
+      }
+    }
+
+    // RENDER PUBLIC UI
+    function renderPublicUI() {
+      const data = getAppData();
+
+      // Janazah
+      const jBanner = document.getElementById("janazahBanner");
+      if (data.janazah && data.janazah.active) {
+        jBanner.classList.remove("hidden");
+        document.getElementById("janazahDetails").textContent = `${data.janazah.marhum} — ${data.janazah.extraNotes || ''}`;
+        document.getElementById("janazahSalahTime").textContent = data.janazah.salahTime;
+        document.getElementById("janazahGraveyard").textContent = data.janazah.graveyard;
+      } else {
+        jBanner.classList.add("hidden");
+      }
+
+      // Prayer Times Grid
+      const p = data.prayers;
+      document.getElementById("adhan-fajr").textContent = p.fajr.adhan;
+      document.getElementById("iqamah-fajr").textContent = p.fajr.iqamah;
+      document.getElementById("adhan-dhuhr").textContent = p.dhuhr.adhan;
+      document.getElementById("iqamah-dhuhr").textContent = p.dhuhr.iqamah;
+      document.getElementById("adhan-asr").textContent = p.asr.adhan;
+      document.getElementById("iqamah-asr").textContent = p.asr.iqamah;
+      document.getElementById("adhan-maghrib").textContent = p.maghrib.adhan;
+      document.getElementById("iqamah-maghrib").textContent = p.maghrib.iqamah;
+      document.getElementById("adhan-isha").textContent = p.isha.adhan;
+      document.getElementById("iqamah-isha").textContent = p.isha.iqamah;
+      document.getElementById("jummah-bayan").textContent = p.jummah.bayan || "12:30";
+      document.getElementById("jummah-khutbah").textContent = p.jummah.khutbah || "13:00";
+
+      // API Badge
+      document.getElementById("apiStatusBadge").textContent = data.autoApi ? "Cape Town Shafi'i Live" : "Manual Override";
+
+      // Classes
+      const classContainer = document.getElementById("classesListContainer");
+      classContainer.innerHTML = "";
+      if (data.classes && data.classes.length > 0) {
+        data.classes.forEach(c => {
+          const div = document.createElement("div");
+          div.className = "p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1.5 hover:border-indigo-300 transition";
+          div.innerHTML = `
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="font-bold text-slate-900 text-xs sm:text-sm">${c.title}</h4>
+              <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded">${c.audience || 'All'}</span>
+            </div>
+            <div class="text-xs text-indigo-900 font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-chalkboard-user text-indigo-600 text-[11px]"></i>
+              <span>${c.teacher}</span>
+            </div>
+            <p class="text-[11px] text-slate-600">${c.desc}</p>
+            <div class="flex items-center gap-3 text-[10px] text-slate-500 font-semibold pt-1">
+              <span class="flex items-center gap-1"><i class="fa-regular fa-clock text-indigo-600"></i> ${c.dayTime}</span>
+              <span class="flex items-center gap-1"><i class="fa-solid fa-location-dot text-indigo-600"></i> ${c.location}</span>
+            </div>
+          `;
+          classContainer.appendChild(div);
+        });
+        document.getElementById("classesCountTag").textContent = `${data.classes.length} active circles`;
+      } else {
+        classContainer.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs italic">No weekly classes scheduled.</div>`;
+      }
+
+      // Events
+      const eventContainer = document.getElementById("eventsListContainer");
+      eventContainer.innerHTML = "";
+      if (data.events && data.events.length > 0) {
+        data.events.forEach(e => {
+          const div = document.createElement("div");
+          div.className = "p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1.5 hover:border-emerald-300 transition";
+          div.innerHTML = `
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="font-bold text-slate-900 text-xs sm:text-sm">${e.title}</h4>
+              <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded font-mono">${e.time}</span>
+            </div>
+            <div class="text-xs text-emerald-800 font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-user-tie text-emerald-600 text-[11px]"></i>
+              <span>${e.speaker}</span>
+            </div>
+            <p class="text-[11px] text-slate-600">${e.desc}</p>
+            <div class="text-[10px] text-slate-500 font-semibold pt-1 flex items-center gap-1">
+              <i class="fa-regular fa-calendar-days text-emerald-700"></i>
+              <span>${e.date}</span>
+            </div>
+          `;
+          eventContainer.appendChild(div);
+        });
+      } else {
+        eventContainer.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs italic">No special events scheduled.</div>`;
+      }
+
+      // Sick List
+      const sickContainer = document.getElementById("sickListContainer");
+      sickContainer.innerHTML = "";
+      if (data.sickList && data.sickList.length > 0) {
+        data.sickList.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "p-3 bg-slate-50 border border-slate-200/80 rounded-xl flex items-start justify-between gap-3";
+          div.innerHTML = `
+            <div>
+              <div class="font-bold text-slate-900 text-xs sm:text-sm flex items-center gap-1.5">
+                <i class="fa-solid fa-user-injured text-teal-600 text-xs"></i>
+                ${item.name}
+              </div>
+              <p class="text-[11px] text-slate-600 mt-0.5">${item.condition}</p>
+            </div>
+            <span class="text-[9px] bg-teal-100 text-teal-800 font-bold px-2 py-0.5 rounded border border-teal-200 whitespace-nowrap">Du'a Requested</span>
+          `;
+          sickContainer.appendChild(div);
+        });
+        document.getElementById("sickCountTag").textContent = `${data.sickList.length} members listed`;
+      } else {
+        sickContainer.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs italic">Alhamdulillah, no registered illnesses.</div>`;
+        document.getElementById("sickCountTag").textContent = `0 listed`;
+      }
+
+      // Hajj & Umrah
+      const hajjContainer = document.getElementById("hajjListContainer");
+      hajjContainer.innerHTML = "";
+      if (data.hajjList && data.hajjList.length > 0) {
+        data.hajjList.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1.5";
+          div.innerHTML = `
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="font-bold text-amber-900 text-xs sm:text-sm">${item.title}</h4>
+              <span class="text-[10px] bg-amber-100 text-amber-800 border border-amber-300 font-bold px-2 py-0.5 rounded">${item.time || ''}</span>
+            </div>
+            <p class="text-[11px] text-slate-600">${item.desc}</p>
+            <div class="flex items-center gap-3 text-[10px] text-slate-500 font-semibold pt-1">
+              <span class="flex items-center gap-1"><i class="fa-regular fa-calendar text-amber-700"></i> ${item.date}</span>
+              <span class="flex items-center gap-1"><i class="fa-solid fa-location-dot text-amber-700"></i> ${item.location}</span>
+            </div>
+          `;
+          hajjContainer.appendChild(div);
+        });
+      } else {
+        hajjContainer.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs italic">No current Hajj/Umrah notices.</div>`;
+      }
+
+      // Fundraisers
+      const fundContainer = document.getElementById("fundraisersContainer");
+      fundContainer.innerHTML = "";
+      if (data.fundraisers && data.fundraisers.length > 0) {
+        data.fundraisers.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between space-y-3";
+          div.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <h4 class="font-bold text-slate-900 text-sm">${item.title}</h4>
+                <span class="text-[11px] font-mono font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">${item.percentage}%</span>
+              </div>
+              <p class="text-xs text-slate-600 mt-1">${item.desc}</p>
+            </div>
+            <div class="space-y-1.5">
+              <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-gradient-to-r from-emerald-600 to-teal-500 h-2.5 rounded-full" style="width: ${item.percentage}%"></div>
+              </div>
+              <div class="flex items-center justify-between text-[11px] font-mono">
+                <span class="text-slate-500">Raised: <strong class="text-emerald-800">${item.raised}</strong></span>
+                <span class="text-slate-500">Target: <strong class="text-slate-800">${item.target}</strong></span>
+              </div>
+            </div>
+          `;
+          fundContainer.appendChild(div);
+        });
+      }
+      document.getElementById("bankDetailsDisplay").textContent = data.bankDetails || "Contact administration for official banking details.";
+
+      // WhatsApp Links
+      const waContainer = document.getElementById("whatsappLinksContainer");
+      waContainer.innerHTML = "";
+      if (data.whatsappLinks && data.whatsappLinks.length > 0) {
+        data.whatsappLinks.forEach(item => {
+          const a = document.createElement("a");
+          a.href = item.url || "#";
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          a.className = "flex items-center justify-between p-2.5 bg-slate-50 hover:bg-green-50/80 border border-slate-200 hover:border-green-300 rounded-xl transition duration-200 group";
+          a.innerHTML = `
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-green-100 text-green-700 flex items-center justify-center text-sm group-hover:scale-110 transition">
+                <i class="fa-brands fa-whatsapp"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-slate-800 group-hover:text-green-900">${item.title}</div>
+                <div class="text-[10px] text-slate-500">${item.desc}</div>
+              </div>
+            </div>
+            <span class="text-[10px] bg-green-700 text-white px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 shadow-sm">
+              <span>Join</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+            </span>
+          `;
+          waContainer.appendChild(a);
+        });
+      }
+
+      // Leadership Directory
+      const leaderContainer = document.getElementById("leadershipContainer");
+      leaderContainer.innerHTML = "";
+      if (data.leadership && data.leadership.length > 0) {
+        data.leadership.forEach(lead => {
+          const div = document.createElement("div");
+          div.className = "p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between space-y-3";
+          div.innerHTML = `
+            <div>
+              <span class="text-[10px] uppercase font-bold tracking-wider text-sky-800 block">${lead.role}</span>
+              <h4 class="font-bold text-slate-900 text-sm mt-0.5">${lead.name}</h4>
+            </div>
+            <div class="space-y-1 text-xs text-slate-600 pt-2 border-t border-slate-200">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-phone text-slate-400 text-[10px] w-3"></i>
+                <a href="tel:${lead.phone}" class="hover:text-emerald-700 font-mono text-[11px] font-semibold">${lead.phone}</a>
+              </div>
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-envelope text-slate-400 text-[10px] w-3"></i>
+                <a href="mailto:${lead.email}" class="hover:text-emerald-700 text-[11px] truncate">${lead.email}</a>
+              </div>
+            </div>
+          `;
+          leaderContainer.appendChild(div);
+        });
+      }
+    }
+
+    // TOAST NOTIFIER
+    function showToast(message, isError = false) {
+      const toast = document.getElementById("toastNotification");
+      const text = document.getElementById("toastMessage");
+      const icon = document.getElementById("toastIcon");
+
+      text.textContent = message;
+      if (isError) {
+        toast.className = "fixed bottom-6 right-6 z-50 transform translate-y-0 opacity-100 transition-all duration-300 flex items-center gap-3 px-5 py-3 rounded-2xl bg-rose-700 text-white font-medium shadow-2xl border border-rose-500";
+        icon.className = "fa-solid fa-triangle-exclamation text-lg text-rose-200";
+      } else {
+        toast.className = "fixed bottom-6 right-6 z-50 transform translate-y-0 opacity-100 transition-all duration-300 flex items-center gap-3 px-5 py-3 rounded-2xl bg-emerald-800 text-white font-medium shadow-2xl border border-emerald-600";
+        icon.className = "fa-solid fa-circle-check text-lg text-emerald-300";
+      }
+
+      setTimeout(() => {
+        toast.classList.remove("translate-y-0", "opacity-100");
+        toast.classList.add("translate-y-20", "opacity-0");
+      }, 3500);
+    }
+
+    // ADMIN AUTHENTICATION
+    function openAdminModal() {
+      document.getElementById("adminModal").classList.remove("hidden");
+      document.getElementById("adminModal").classList.add("flex");
+      
+      if (sessionStorage.getItem("masjid_admin_logged") === "true") {
+        showControlDashboard();
+      } else {
+        document.getElementById("adminAuthBox").classList.remove("hidden");
+        document.getElementById("adminControlPanel").classList.add("hidden");
+        document.getElementById("loginUsername").focus();
+      }
+    }
+
+    function closeAdminModal() {
+      document.getElementById("adminModal").classList.add("hidden");
+      document.getElementById("adminModal").classList.remove("flex");
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById("loginUsername").value.trim();
+      const p = document.getElementById("loginPassword").value.trim();
+      const creds = getAuthCreds();
+
+      if (u === creds.username && p === creds.password) {
+        sessionStorage.setItem("masjid_admin_logged", "true");
+        document.getElementById("loginError").classList.add("hidden");
+        document.getElementById("adminLoginForm").reset();
+        showControlDashboard();
+        showToast("Logged in successfully.");
+      } else {
+        document.getElementById("loginError").classList.remove("hidden");
+      }
+    }
+
+    function handleAdminLogout() {
+      sessionStorage.removeItem("masjid_admin_logged");
+      document.getElementById("adminAuthBox").classList.remove("hidden");
+      document.getElementById("adminControlPanel").classList.add("hidden");
+      showToast("Logged out successfully.");
+    }
+
+    function showControlDashboard() {
+      document.getElementById("adminAuthBox").classList.add("hidden");
+      document.getElementById("adminControlPanel").classList.remove("hidden");
+      populateAdminFields();
+    }
+
+    function toggleApiMode(isAuto) {
+      document.getElementById("manualNotice").textContent = isAuto ? "Auto-Sync is Active" : "Manual Override Mode Enabled";
+      document.getElementById("manualNotice").className = isAuto ? "text-xs text-emerald-700 font-semibold" : "text-xs text-amber-700 font-bold";
+      if (isAuto) {
+        fetchAlAdhanTimings(true);
+      }
+    }
+
+    // ADMIN FORM POPULATOR
+    function populateAdminFields() {
+      const data = getAppData();
+      const creds = getAuthCreds();
+
+      // API Settings
+      document.getElementById("inputAutoApi").checked = data.autoApi !== false;
+      document.getElementById("inputIqamaOffset").value = data.iqamaOffset || 10;
+      document.getElementById("inputHijriOffset").value = data.hijriOffset !== undefined ? String(data.hijriOffset) : "0";
+      toggleApiMode(data.autoApi !== false);
+
+      // Janazah
+      document.getElementById("inputJanazahActive").checked = data.janazah.active;
+      document.getElementById("inputJanazahMarhum").value = data.janazah.marhum || "";
+      document.getElementById("inputJanazahSalahTime").value = data.janazah.salahTime || "";
+      document.getElementById("inputJanazahGraveyard").value = data.janazah.graveyard || "";
+      document.getElementById("inputJanazahExtra").value = data.janazah.extraNotes || "";
+
+      // Prayers
+      const p = data.prayers;
+      document.getElementById("edit-adhan-fajr").value = p.fajr.adhan;
+      document.getElementById("edit-iqamah-fajr").value = p.fajr.iqamah;
+      document.getElementById("edit-adhan-dhuhr").value = p.dhuhr.adhan;
+      document.getElementById("edit-iqamah-dhuhr").value = p.dhuhr.iqamah;
+      document.getElementById("edit-adhan-asr").value = p.asr.adhan;
+      document.getElementById("edit-iqamah-asr").value = p.asr.iqamah;
+      document.getElementById("edit-adhan-maghrib").value = p.maghrib.adhan;
+      document.getElementById("edit-iqamah-maghrib").value = p.maghrib.iqamah;
+      document.getElementById("edit-adhan-isha").value = p.isha.adhan;
+      document.getElementById("edit-iqamah-isha").value = p.isha.iqamah;
+      document.getElementById("edit-jummah-bayan").value = p.jummah.bayan || "12:30";
+      document.getElementById("edit-jummah-khutbah").value = p.jummah.khutbah || "13:00";
+
+      // Bank Details
+      document.getElementById("inputBankDetails").value = data.bankDetails || "";
+
+      // Security
+      document.getElementById("changeUsernameInput").value = creds.username;
+      document.getElementById("changePasswordInput").value = "";
+
+      // Render Dynamic Rows
+      renderAdminClassRows(data.classes || []);
+      renderAdminEventRows(data.events || []);
+      renderAdminSickRows(data.sickList || []);
+      renderAdminHajjRows(data.hajjList || []);
+      renderAdminFundraiserRows(data.fundraisers || []);
+      renderAdminWhatsappRows(data.whatsappLinks || []);
+      renderAdminLeadershipRows(data.leadership || []);
+    }
+
+    // Dynamic Row Helpers
+    function renderAdminClassRows(list) {
+      const container = document.getElementById("adminClassRows");
+      container.innerHTML = "";
+      list.forEach(c => {
+        const row = document.createElement("div");
+        row.className = "bg-slate-50 p-2.5 rounded-xl border border-slate-200 class-item-row space-y-2";
+        row.innerHTML = `
+          <div class="flex items-center gap-2">
+            <input type="text" value="${c.title}" placeholder="Subject / Class Title" class="w-2/3 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold class-title">
+            <input type="text" value="${c.audience || ''}" placeholder="Audience (e.g. All)" class="w-1/3 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 class-audience">
+            <button onclick="this.parentElement.parentElement.remove()" class="p-1 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <input type="text" value="${c.teacher}" placeholder="Teacher / Sheikh" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 class-teacher">
+            <input type="text" value="${c.dayTime}" placeholder="Day & Time" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 class-daytime">
+            <input type="text" value="${c.location}" placeholder="Venue/Room" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 class-location">
+          </div>
+          <input type="text" value="${c.desc}" placeholder="Brief syllabus / details" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 class-desc">
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addClassRow() {
+      const container = document.getElementById("adminClassRows");
+      const row = document.createElement("div");
+      row.className = "bg-slate-50 p-2.5 rounded-xl border border-slate-200 class-item-row space-y-2";
+      row.innerHTML = `
+        <div class="flex items-center gap-2">
+          <input type="text" placeholder="Subject / Class Title" class="w-2/3 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold class-title">
+          <input type="text" placeholder="Audience (e.g. All)" class="w-1/3 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 class-audience">
+          <button onclick="this.parentElement.parentElement.remove()" class="p-1 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <input type="text" placeholder="Teacher / Sheikh" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 class-teacher">
+          <input type="text" placeholder="Day & Time" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 class-daytime">
+          <input type="text" placeholder="Venue/Room" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 class-location">
+        </div>
+        <input type="text" placeholder="Brief details" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 class-desc">
+      `;
+      container.appendChild(row);
+    }
+
+    function renderAdminEventRows(list) {
+      const container = document.getElementById("adminEventRows");
+      container.innerHTML = "";
+      list.forEach(e => {
+        const row = document.createElement("div");
+        row.className = "bg-slate-50 p-2.5 rounded-xl border border-slate-200 event-item-row space-y-2";
+        row.innerHTML = `
+          <div class="flex items-center gap-2">
+            <input type="text" value="${e.title}" placeholder="Event Title" class="w-2/3 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold event-title">
+            <input type="text" value="${e.time}" placeholder="Time" class="w-1/3 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 event-time">
+            <button onclick="this.parentElement.parentElement.remove()" class="p-1 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" value="${e.date}" placeholder="Date" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 event-date">
+            <input type="text" value="${e.speaker}" placeholder="Guest Speaker / Org" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 event-speaker">
+          </div>
+          <input type="text" value="${e.desc}" placeholder="Event description" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 event-desc">
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addEventRow() {
+      const container = document.getElementById("adminEventRows");
+      const row = document.createElement("div");
+      row.className = "bg-slate-50 p-2.5 rounded-xl border border-slate-200 event-item-row space-y-2";
+      row.innerHTML = `
+        <div class="flex items-center gap-2">
+          <input type="text" placeholder="Event Title" class="w-2/3 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold event-title">
+          <input type="text" placeholder="Time" class="w-1/3 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 event-time">
+          <button onclick="this.parentElement.parentElement.remove()" class="p-1 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" placeholder="Date" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 event-date">
+          <input type="text" placeholder="Speaker / Organization" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 event-speaker">
+        </div>
+        <input type="text" placeholder="Event description" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 event-desc">
+      `;
+      container.appendChild(row);
+    }
+
+    function renderAdminSickRows(list) {
+      const container = document.getElementById("adminSickRows");
+      container.innerHTML = "";
+      list.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200 sick-item-row";
+        row.innerHTML = `
+          <input type="text" value="${item.name}" placeholder="Full Name" class="w-1/2 px-2.5 py-1.5 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold sick-name">
+          <input type="text" value="${item.condition}" placeholder="Condition / Ward" class="w-1/2 px-2.5 py-1.5 bg-white border border-slate-300 rounded text-xs text-slate-900 sick-condition">
+          <button onclick="this.parentElement.remove()" class="p-1.5 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addSickRow() {
+      const container = document.getElementById("adminSickRows");
+      const row = document.createElement("div");
+      row.className = "flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200 sick-item-row";
+      row.innerHTML = `
+        <input type="text" placeholder="Full Name" class="w-1/2 px-2.5 py-1.5 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold sick-name">
+        <input type="text" placeholder="Condition / Note" class="w-1/2 px-2.5 py-1.5 bg-white border border-slate-300 rounded text-xs text-slate-900 sick-condition">
+        <button onclick="this.parentElement.remove()" class="p-1.5 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+      `;
+      container.appendChild(row);
+    }
+
+    function renderAdminHajjRows(list) {
+      const container = document.getElementById("adminHajjRows");
+      container.innerHTML = "";
+      list.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "bg-slate-50 p-2.5 rounded-xl border border-slate-200 hajj-item-row space-y-2";
+        row.innerHTML = `
+          <div class="flex items-center gap-2">
+            <input type="text" value="${item.title}" placeholder="Event Title" class="w-2/3 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold hajj-title">
+            <input type="text" value="${item.time}" placeholder="Time" class="w-1/3 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 hajj-time">
+            <button onclick="this.parentElement.parentElement.remove()" class="p-1 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" value="${item.date}" placeholder="Date" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 hajj-date">
+            <input type="text" value="${item.location}" placeholder="Location" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 hajj-location">
+          </div>
+          <input type="text" value="${item.desc}" placeholder="Brief Summary" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 hajj-desc">
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addHajjRow() {
+      const container = document.getElementById("adminHajjRows");
+      const row = document.createElement("div");
+      row.className = "bg-slate-50 p-2.5 rounded-xl border border-slate-200 hajj-item-row space-y-2";
+      row.innerHTML = `
+        <div class="flex items-center gap-2">
+          <input type="text" placeholder="Notice Title" class="w-2/3 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold hajj-title">
+          <input type="text" placeholder="Time" class="w-1/3 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 hajj-time">
+          <button onclick="this.parentElement.parentElement.remove()" class="p-1 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" placeholder="Date" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 hajj-date">
+          <input type="text" placeholder="Location" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 hajj-location">
+        </div>
+        <input type="text" placeholder="Brief Summary" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 hajj-desc">
+      `;
+      container.appendChild(row);
+    }
+
+    function renderAdminFundraiserRows(list) {
+      const container = document.getElementById("adminFundraiserRows");
+      container.innerHTML = "";
+      list.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "bg-slate-50 p-2.5 rounded-xl border border-slate-200 fund-item-row space-y-2";
+        row.innerHTML = `
+          <div class="flex items-center gap-2">
+            <input type="text" value="${item.title}" placeholder="Project Title" class="flex-1 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold fund-title">
+            <input type="number" value="${item.percentage}" placeholder="%" class="w-16 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-emerald-800 font-black fund-percent">
+            <button onclick="this.parentElement.parentElement.remove()" class="p-1 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" value="${item.target}" placeholder="Target" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 fund-target">
+            <input type="text" value="${item.raised}" placeholder="Raised" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 fund-raised">
+          </div>
+          <input type="text" value="${item.desc}" placeholder="Project description" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 fund-desc">
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addFundraiserRow() {
+      const container = document.getElementById("adminFundraiserRows");
+      const row = document.createElement("div");
+      row.className = "bg-slate-50 p-2.5 rounded-xl border border-slate-200 fund-item-row space-y-2";
+      row.innerHTML = `
+        <div class="flex items-center gap-2">
+          <input type="text" placeholder="Project Title" class="flex-1 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold fund-title">
+          <input type="number" value="0" placeholder="%" class="w-16 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-emerald-800 font-black fund-percent">
+          <button onclick="this.parentElement.parentElement.remove()" class="p-1 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" placeholder="Target (e.g. R 180,000)" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 fund-target">
+          <input type="text" placeholder="Raised (e.g. R 50,000)" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 fund-raised">
+        </div>
+        <input type="text" placeholder="Description" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 fund-desc">
+      `;
+      container.appendChild(row);
+    }
+
+    function renderAdminWhatsappRows(list) {
+      const container = document.getElementById("adminWhatsappRows");
+      container.innerHTML = "";
+      list.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "bg-slate-50 p-2 rounded-xl border border-slate-200 wa-item-row space-y-1.5";
+        row.innerHTML = `
+          <div class="flex items-center gap-2">
+            <input type="text" value="${item.title}" placeholder="Channel Title" class="flex-1 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold wa-title">
+            <button onclick="this.parentElement.parentElement.remove()" class="p-1 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" value="${item.url}" placeholder="https://chat.whatsapp.com/..." class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 wa-url">
+            <input type="text" value="${item.desc}" placeholder="Description" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 wa-desc">
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addWhatsappRow() {
+      const container = document.getElementById("adminWhatsappRows");
+      const row = document.createElement("div");
+      row.className = "bg-slate-50 p-2 rounded-xl border border-slate-200 wa-item-row space-y-1.5";
+      row.innerHTML = `
+        <div class="flex items-center gap-2">
+          <input type="text" placeholder="Channel Title" class="flex-1 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold wa-title">
+          <button onclick="this.parentElement.parentElement.remove()" class="p-1 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" placeholder="https://chat.whatsapp.com/..." class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 wa-url">
+          <input type="text" placeholder="Description" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 wa-desc">
+        </div>
+      `;
+      container.appendChild(row);
+    }
+
+    function renderAdminLeadershipRows(list) {
+      const container = document.getElementById("adminLeadershipRows");
+      container.innerHTML = "";
+      list.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "bg-slate-50 p-2.5 rounded-xl border border-slate-200 lead-item-row space-y-2";
+        row.innerHTML = `
+          <div class="flex items-center gap-2">
+            <input type="text" value="${item.role}" placeholder="Designation" class="w-1/2 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-sky-800 font-bold lead-role">
+            <input type="text" value="${item.name}" placeholder="Full Name" class="w-1/2 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold lead-name">
+            <button onclick="this.parentElement.parentElement.remove()" class="p-1 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" value="${item.phone}" placeholder="Phone" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 lead-phone">
+            <input type="text" value="${item.email}" placeholder="Email" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 lead-email">
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addLeadershipRow() {
+      const container = document.getElementById("adminLeadershipRows");
+      const row = document.createElement("div");
+      row.className = "bg-slate-50 p-2.5 rounded-xl border border-slate-200 lead-item-row space-y-2";
+      row.innerHTML = `
+        <div class="flex items-center gap-2">
+          <input type="text" placeholder="Designation" class="w-1/2 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-sky-800 font-bold lead-role">
+          <input type="text" placeholder="Full Name" class="w-1/2 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 font-bold lead-name">
+          <button onclick="this.parentElement.parentElement.remove()" class="p-1 text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash-can text-xs"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" placeholder="Phone Number" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 lead-phone">
+          <input type="text" placeholder="Email Address" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs text-slate-900 lead-email">
+        </div>
+      `;
+      container.appendChild(row);
+    }
+
+    // SAVE ALL ADMIN CHANGES
+    function saveAllAdminChanges() {
+      const autoApi = document.getElementById("inputAutoApi").checked;
+      const iqamaOffset = parseInt(document.getElementById("inputIqamaOffset").value, 10) || 10;
+      const hijriOffset = parseInt(document.getElementById("inputHijriOffset").value, 10) || 0;
+
+      const janazah = {
+        active: document.getElementById("inputJanazahActive").checked,
+        marhum: document.getElementById("inputJanazahMarhum").value.trim(),
+        salahTime: document.getElementById("inputJanazahSalahTime").value.trim(),
+        graveyard: document.getElementById("inputJanazahGraveyard").value.trim(),
+        extraNotes: document.getElementById("inputJanazahExtra").value.trim()
+      };
+
+      const prayers = {
+        fajr: { adhan: document.getElementById("edit-adhan-fajr").value.trim(), iqamah: document.getElementById("edit-iqamah-fajr").value.trim() },
+        dhuhr: { adhan: document.getElementById("edit-adhan-dhuhr").value.trim(), iqamah: document.getElementById("edit-iqamah-dhuhr").value.trim() },
+        asr: { adhan: document.getElementById("edit-adhan-asr").value.trim(), iqamah: document.getElementById("edit-iqamah-asr").value.trim() },
+        maghrib: { adhan: document.getElementById("edit-adhan-maghrib").value.trim(), iqamah: document.getElementById("edit-iqamah-maghrib").value.trim() },
+        isha: { adhan: document.getElementById("edit-adhan-isha").value.trim(), iqamah: document.getElementById("edit-iqamah-isha").value.trim() },
+        jummah: { bayan: document.getElementById("edit-jummah-bayan").value.trim(), khutbah: document.getElementById("edit-jummah-khutbah").value.trim() }
+      };
+
+      // Classes
+      const classRows = document.querySelectorAll(".class-item-row");
+      const classes = [];
+      classRows.forEach(row => {
+        const title = row.querySelector(".class-title").value.trim();
+        const teacher = row.querySelector(".class-teacher").value.trim();
+        const dayTime = row.querySelector(".class-daytime").value.trim();
+        const location = row.querySelector(".class-location").value.trim();
+        const audience = row.querySelector(".class-audience").value.trim();
+        const desc = row.querySelector(".class-desc").value.trim();
+        if (title) classes.push({ title, teacher, dayTime, location, audience, desc });
+      });
+
+      // Events
+      const eventRows = document.querySelectorAll(".event-item-row");
+      const events = [];
+      eventRows.forEach(row => {
+        const title = row.querySelector(".event-title").value.trim();
+        const time = row.querySelector(".event-time").value.trim();
+        const date = row.querySelector(".event-date").value.trim();
+        const speaker = row.querySelector(".event-speaker").value.trim();
+        const desc = row.querySelector(".event-desc").value.trim();
+        if (title) events.push({ title, time, date, speaker, desc });
+      });
+
+      // Sick List
+      const sickRows = document.querySelectorAll(".sick-item-row");
+      const sickList = [];
+      sickRows.forEach(row => {
+        const name = row.querySelector(".sick-name").value.trim();
+        const condition = row.querySelector(".sick-condition").value.trim();
+        if (name) sickList.push({ name, condition });
+      });
+
+      // Hajj
+      const hajjRows = document.querySelectorAll(".hajj-item-row");
+      const hajjList = [];
+      hajjRows.forEach(row => {
+        const title = row.querySelector(".hajj-title").value.trim();
+        const time = row.querySelector(".hajj-time").value.trim();
+        const date = row.querySelector(".hajj-date").value.trim();
+        const location = row.querySelector(".hajj-location").value.trim();
+        const desc = row.querySelector(".hajj-desc").value.trim();
+        if (title) hajjList.push({ title, time, date, location, desc });
+      });
+
+      // Fundraisers
+      const fundRows = document.querySelectorAll(".fund-item-row");
+      const fundraisers = [];
+      fundRows.forEach(row => {
+        const title = row.querySelector(".fund-title").value.trim();
+        const percentage = Number(row.querySelector(".fund-percent").value) || 0;
+        const target = row.querySelector(".fund-target").value.trim();
+        const raised = row.querySelector(".fund-raised").value.trim();
+        const desc = row.querySelector(".fund-desc").value.trim();
+        if (title) fundraisers.push({ title, percentage, target, raised, desc });
+      });
+
+      // WhatsApp
+      const waRows = document.querySelectorAll(".wa-item-row");
+      const whatsappLinks = [];
+      waRows.forEach(row => {
+        const title = row.querySelector(".wa-title").value.trim();
+        const url = row.querySelector(".wa-url").value.trim();
+        const desc = row.querySelector(".wa-desc").value.trim();
+        if (title) whatsappLinks.push({ title, url, desc });
+      });
+
+      // Leadership
+      const leadRows = document.querySelectorAll(".lead-item-row");
+      const leadership = [];
+      leadRows.forEach(row => {
+        const role = row.querySelector(".lead-role").value.trim();
+        const name = row.querySelector(".lead-name").value.trim();
+        const phone = row.querySelector(".lead-phone").value.trim();
+        const email = row.querySelector(".lead-email").value.trim();
+        if (name) leadership.push({ role, name, phone, email });
+      });
+
+      const updatedData = {
+        autoApi,
+        iqamaOffset,
+        hijriOffset,
+        janazah,
+        prayers,
+        classes,
+        events,
+        sickList,
+        hajjList,
+        fundraisers,
+        bankDetails: document.getElementById("inputBankDetails").value.trim(),
+        whatsappLinks,
+        leadership
+      };
+
+      saveAppData(updatedData);
+
+      // Credential Update
+      const newU = document.getElementById("changeUsernameInput").value.trim();
+      const newP = document.getElementById("changePasswordInput").value.trim();
+      const currentCreds = getAuthCreds();
+
+      if (newU) currentCreds.username = newU;
+      if (newP) currentCreds.password = newP;
+      localStorage.setItem(STORAGE_AUTH_KEY, JSON.stringify(currentCreds));
+
+      updateClockAndDates();
+      showToast("Board synchronized and published live!");
+      closeAdminModal();
+    }
+
+    function resetToFactoryDefaults() {
+      if (confirm("Are you sure you want to reset all notice board information back to the original mosque defaults?")) {
+        localStorage.removeItem(STORAGE_DATA_KEY);
+        populateAdminFields();
+        renderPublicUI();
+        updateClockAndDates();
+        fetchAlAdhanTimings();
+        showToast("Restored default mosque records.");
+      }
+    }
+
+    // CROSS TAB INSTANT SYNC
+    window.addEventListener("storage", (e) => {
+      if (e.key === STORAGE_DATA_KEY) {
+        renderPublicUI();
+        updateClockAndDates();
+      }
+    });
+
+    // INITIALIZATION
+    document.addEventListener("DOMContentLoaded", () => {
+      renderPublicUI();
+      updateClockAndDates();
+      setInterval(updateClockAndDates, 1000);
+      
+      // Auto-fetch from Cape Town Shafi'i AlAdhan API on boot
+      fetchAlAdhanTimings();
+      
+      // Re-fetch daily at 00:05 AM
+      setInterval(() => {
+        const now = new Date();
+        if (now.getHours() === 0 && now.getMinutes() === 5) {
+          fetchAlAdhanTimings();
+        }
+      }, 60000);
+    });
+  </script>
+</body>
+</html>
